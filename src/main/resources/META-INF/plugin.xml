@@ -14,6 +14,11 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
+        <toolWindow id="OneSignal Plugin"
+                    secondary="true"
+                    icon="AllIcons.General.Modified"
+                    anchor="right"
+                    factoryClass="OneSignalToolWindowFactory"/>
     </extensions>
 
     <actions>
