@@ -64,6 +64,11 @@ class OneSignalToolWindowFactory : ToolWindowFactory, OneSignalStepListener {
         }
     }
 
+    override fun onStepCancel() {
+        sdkSetupStepIndex = 0
+        showPanel(welcomeKey)
+    }
+
     private fun showPanel(panelName: String) {
         mainCardLayout.show(mainPanel, panelName);
     }

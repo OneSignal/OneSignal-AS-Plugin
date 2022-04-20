@@ -35,6 +35,7 @@ class SDKSetupFirstStepPanel(
     """
     private var instructionsLabel: MultilineLabel = MultilineLabel(instructionString)
     private var nextButton: JButton = JButton("Next")
+    private var cancelButton: JButton = JButton("Cancel")
 
     init {
 
@@ -59,10 +60,19 @@ class SDKSetupFirstStepPanel(
 
         bagConstraints.gridy = 1
         bagConstraints.gridx = 1
-        bagConstraints.weightx = 1.0
+        bagConstraints.weightx = 0.2
         bagConstraints.weighty = 0.1
 
         add(nextButton, bagConstraints)
+
+        // Cancel Button
+
+        bagConstraints.gridy = 1
+        bagConstraints.gridx = 0
+        bagConstraints.weightx = 0.2
+        bagConstraints.weighty = 0.1
+
+        add(cancelButton, bagConstraints)
 
         initListeners()
     }
@@ -71,6 +81,9 @@ class SDKSetupFirstStepPanel(
         nextButton.addActionListener {
             controller.addSDKToBuildGradle(basePath)
             stepListener.onNextStep()
+        }
+        cancelButton.addActionListener {
+            stepListener.onStepCancel()
         }
     }
 
