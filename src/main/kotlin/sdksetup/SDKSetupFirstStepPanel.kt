@@ -2,6 +2,7 @@ package sdksetup
 
 import OneSignalStep
 import OneSignalStepListener
+import com.intellij.openapi.project.Project
 import view.MultilineLabel
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -10,6 +11,7 @@ import javax.swing.JPanel
 
 class SDKSetupFirstStepPanel(
     private val basePath: String,
+    private val project: Project,
     private val stepListener: OneSignalStepListener
 ) : JPanel(),
     OneSignalStep {
@@ -79,7 +81,7 @@ class SDKSetupFirstStepPanel(
 
     private fun initListeners() {
         nextButton.addActionListener {
-            controller.addSDKToBuildGradle(basePath)
+            controller.addSDKToBuildGradle(basePath, project)
             stepListener.onNextStep()
         }
         cancelButton.addActionListener {
