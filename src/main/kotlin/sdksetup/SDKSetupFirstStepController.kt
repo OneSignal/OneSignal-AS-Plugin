@@ -16,10 +16,12 @@ class SDKSetupFirstStepController {
 
         content = content.appendStringByMatch(
             "classpath 'com.android.tools.build:gradle:.+'",
+            "gradle.plugin.com.onesignal:onesignal-gradle-plugin",
             "classpath 'gradle.plugin.com.onesignal:onesignal-gradle-plugin:[0.12.9, 0.99.99]'", "\n\t\t"
         )
         content = content.appendStringByMatch(
             "classpath\\s\"com\\.android\\.tools\\.build:gradle:.+\"",
+            "gradle.plugin.com.onesignal:onesignal-gradle-plugin",
             "classpath \"gradle.plugin.com.onesignal:onesignal-gradle-plugin:[0.12.9, 0.99.99]\"", "\n\t\t"
         )
 
