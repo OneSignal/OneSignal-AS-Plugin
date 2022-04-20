@@ -17,36 +17,43 @@ class SDKSetupSecondStepController {
 
         content = content.appendStringByMatch(
             "implementation \"androidx.appcompat:appcompat:[^']*\"",
+            "com.onesignal:OneSignal",
             "implementation \"com.onesignal:OneSignal:[4.0.0, 4.99.99]\"",
-            "\n\t\t"
-        )
-        content = content.appendStringByMatch(
-            "implementation 'androidx.appcompat:appcompat:[^']*'",
-            "implementation 'com.onesignal:OneSignal:[4.0.0, 4.99.99]'",
-            "\n\t\t"
+            "\n\t"
         )
         content = content.appendStringByMatch(
             "implementation \"com.google.android.material:material:[^']*\"",
+            "com.onesignal:OneSignal",
             "implementation \"com.onesignal:OneSignal:[4.0.0, 4.99.99]\"",
-            "\n\t\t"
+            "\n\t"
+        )
+
+        content = content.appendStringByMatch(
+            "implementation 'androidx.appcompat:appcompat:[^']*'",
+            "com.onesignal:OneSignal",
+            "implementation 'com.onesignal:OneSignal:[4.0.0, 4.99.99]'",
+            "\n\t"
         )
         content = content.appendStringByMatch(
             "implementation 'com.google.android.material:material:[^']*'",
+            "com.onesignal:OneSignal",
             "implementation 'com.onesignal:OneSignal:[4.0.0, 4.99.99]'",
-            "\n\t\t"
+            "\n\t"
         )
 
         // injecting onesignal-gradle-plugin
 
         content = content.appendStringByMatch(
             "apply plugin: 'com.android.application'",
+            "com.onesignal.androidsdk.onesignal-gradle-plugin",
             "apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'",
-            "\n\t\t"
+            "\n"
         )
         content = content.appendStringByMatch(
             "id 'com.android.application'",
+            "com.onesignal.androidsdk.onesignal-gradle-plugin",
             "id 'com.onesignal.androidsdk.onesignal-gradle-plugin'",
-            "\n\t\t"
+            "\n\t"
         )
 
         projectBuildGradle.writeText(content)
