@@ -5,6 +5,7 @@ import com.intellij.ui.content.ContentFactory
 
 import sdksetup.SDKSetupFirstStepPanel
 import sdksetup.SDKSetupSecondStepPanel
+import utils.showNotification
 
 import java.awt.CardLayout
 import javax.swing.JComponent
@@ -32,8 +33,8 @@ class OneSignalToolWindowFactory : ToolWindowFactory, OneSignalStepListener {
         this.toolWindow = toolWindow
 
         // If basePath is null add step to get basePath
-        sdkSetupSteps["first_step_panel"] = SDKSetupFirstStepPanel(project.basePath!!, this@OneSignalToolWindowFactory)
-        sdkSetupSteps["second_step_panel"] = SDKSetupSecondStepPanel(project.basePath!!, this@OneSignalToolWindowFactory)
+        sdkSetupSteps["first_step_panel"] = SDKSetupFirstStepPanel(project.basePath!!, project, this@OneSignalToolWindowFactory)
+        sdkSetupSteps["second_step_panel"] = SDKSetupSecondStepPanel(project.basePath!!, project, this@OneSignalToolWindowFactory)
 
         val welcomePanel = WelcomeScreenPanel(this@OneSignalToolWindowFactory)
 
@@ -51,6 +52,10 @@ class OneSignalToolWindowFactory : ToolWindowFactory, OneSignalStepListener {
     }
 
     override fun onNextStep() {
+        project?.let {
+            showNotification(it, "Navigating to next panel")
+        }
+
         var index = 0
         val keysIterator = sdkSetupSteps.keys.iterator()
         while (keysIterator.hasNext()) {
