@@ -32,6 +32,7 @@ class OneSignalToolWindowFactory : ToolWindowFactory, OneSignalStepListener {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         this.project = project
         this.toolWindow = toolWindow
+        this.sdkSetupStepIndex = 0
 
         // If basePath is null add step to get basePath
         sdkSetupSteps["first_step_panel"] = SDKSetupFirstStepPanel(project.basePath!!, project, this@OneSignalToolWindowFactory)
