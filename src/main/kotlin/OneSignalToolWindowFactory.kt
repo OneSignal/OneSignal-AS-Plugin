@@ -5,6 +5,7 @@ import com.intellij.ui.content.ContentFactory
 
 import sdksetup.SDKSetupFirstStepPanel
 import sdksetup.SDKSetupSecondStepPanel
+import sdksetup.SDKSetupThirdStepPanel
 import utils.showNotification
 
 import java.awt.CardLayout
@@ -35,6 +36,7 @@ class OneSignalToolWindowFactory : ToolWindowFactory, OneSignalStepListener {
         // If basePath is null add step to get basePath
         sdkSetupSteps["first_step_panel"] = SDKSetupFirstStepPanel(project.basePath!!, project, this@OneSignalToolWindowFactory)
         sdkSetupSteps["second_step_panel"] = SDKSetupSecondStepPanel(project.basePath!!, project, this@OneSignalToolWindowFactory)
+        sdkSetupSteps["third_step_panel"] = SDKSetupThirdStepPanel(project.basePath!!, project, this@OneSignalToolWindowFactory)
 
         val welcomePanel = WelcomeScreenPanel(this@OneSignalToolWindowFactory)
 
