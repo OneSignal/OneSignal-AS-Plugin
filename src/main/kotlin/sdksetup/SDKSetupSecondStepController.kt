@@ -1,17 +1,26 @@
 package sdksetup
 
 import com.intellij.openapi.project.Project
+import exception.OneSignalException
+import exception.gradlePathNotFound
 import utils.appendStringByMatch
+import utils.showNotification
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class SDKSetupSecondStepController {
 
     fun addSDKToAppBuildGradle(basePath: String, appDirectory: String, project: Project) {
-        addSDKToAppBuildGradle("$basePath/$appDirectory", project)
-    }
+        val gradleFilePath = "$basePath/$appDirectory/build.gradle"
+        val gradleFileExist = Files.exists(Paths.get(gradleFilePath))
 
-    fun addSDKToAppBuildGradle(buildGradlePath: String, project: Project) {
-        val projectBuildGradle = File("$buildGradlePath/build.gradle")
+        if (!gradleFileExist) {
+            throw OneSignalException(gradlePathNotFound)
+        }
+
+        val projectBuildGradle = File(gradleFilePath)
+
         var content: String = projectBuildGradle.readText()
 
         // injecting com.onesignal:OneSignal dependency

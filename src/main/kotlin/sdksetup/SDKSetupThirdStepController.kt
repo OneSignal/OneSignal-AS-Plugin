@@ -1,6 +1,10 @@
 package sdksetup
 
 import com.intellij.openapi.project.Project
+import exception.OneSignalException
+import exception.manifestPathNotFound
+import exception.nonTraceableError
+import exception.packageNotFound
 import utils.appendStringByMatch
 import utils.showNotification
 import java.io.File
@@ -21,71 +25,68 @@ class SDKSetupThirdStepController {
         else
             FileType.KOTLIN
 
-    fun applicationOneSignalCodeInjection(basePath: String, appId: String, project: Project) {
-        val packagePathSequence = getApplicationPackage(basePath, project)
-
-        if (packagePathSequence == null) {
-            // Display error, ask user for Application path
-            showNotification(project, "Application not packagePathSequence found: $packagePathSequence")
-            return
-        }
+    fun applicationOneSignalCodeInjection(basePath: String, appDirectory: String, appId: String, project: Project) {
+        val packagePathSequence = getApplicationPackage(basePath, appDirectory, project)
+            ?: throw OneSignalException(packageNotFound)
 
         val projectDirectory = buildPath(packagePathSequence) // "com/onesignal/sdktest"
-        val applicationPath = getApplicationFilePath(basePath, project) // null or ".application.MainApplication"
+        val applicationPath =
+            getApplicationFilePath(basePath, appDirectory, project) // null or ".application.MainApplication"
 
-        showNotification(project, "Application projectDirectory: $projectDirectory")
-        showNotification(project, "Application applicationPath: $applicationPath")
         if (applicationPath != null) {
             val applicationFilePath =
                 "$projectDirectory${buildPath(applicationPath)}" // "com/onesignal/sdktest/application/MainApplication"
             showNotification(project, "Application applicationFilePath: $applicationFilePath")
 
-            var resultPath = ""
-            val javaPath = "$basePath/app/src/main/java/$applicationFilePath.java"
-            val kotlinPath = "$basePath/app/src/main/kotlin/$applicationFilePath.kt"
+            val resultPath: String
+            val javaPath = "$basePath/$appDirectory/src/main/java/$applicationFilePath.java"
+            val kotlinPath = "$basePath/$appDirectory/src/main/kotlin/$applicationFilePath.kt"
 
-            when {
+            resultPath = when {
                 Files.exists(Paths.get(javaPath)) -> {
-                    resultPath = javaPath
+                    javaPath
                 }
                 Files.exists(Paths.get(kotlinPath)) -> {
-                    resultPath = kotlinPath
+                    kotlinPath
                 }
                 else -> {
-                    // Error no application class found
+                    // Track error
+                    throw OneSignalException(nonTraceableError)
                 }
             }
             showNotification(project, "resultPath: $resultPath")
-            addInitCodeToFile(resultPath, "app_id_test", project)
+            addInitCodeToFile(resultPath, appId, project)
         } else {
             // Improvement Note: Add an option for the user to choose between Kotlin and Java for the Application class generated
             val applicationClassName = "MainApplication"
             val newApplicationFilePath =
-                "$basePath/app/src/main/java/$projectDirectory/$applicationClassName.java"
+                "$basePath/$appDirectory/src/main/java/$projectDirectory/$applicationClassName.java"
             createApplicationFile(newApplicationFilePath, packagePathSequence, project)
             addInitCodeToFile(newApplicationFilePath, appId, project)
 
             // We need to modify Manifest file and add application name to the created path
             // android:name=".application.MainApplication"
 
-            addApplicationToManifest(basePath, ".$applicationClassName", project)
+            addApplicationToManifest(basePath, appDirectory,".$applicationClassName", project)
         }
-    }
-
-    private fun getManifestFile(basePath: String, project: Project): File {
-        val manifestFilePath = "$basePath/app/src/main/AndroidManifest.xml"
-        showNotification(project, "manifestFilePath: $manifestFilePath")
-        // Check if this file exist, if not print error ask user for correct path
-        return File(manifestFilePath)
     }
 
     /**
      * Method that search for the AndroidManifest.xml file inside default package $basePath/app/src/main/AndroidManifest.xml
      *
-     * @return manifest content
+     * @return manifest file
      */
-    private fun getManifestContent(basePath: String, project: Project): String {
-        return getManifestFile(basePath, project).readText()
+    private fun getManifestFile(basePath: String, appDirectory: String): File {
+        val manifestFilePath = "$basePath/$appDirectory/src/main/AndroidManifest.xml"
+
+        val manifestFileExist = Files.exists(Paths.get(manifestFilePath))
+
+        if (!manifestFileExist) {
+            throw OneSignalException(manifestPathNotFound)
+        }
+
+        // Check if this file exist, if not print error ask user for correct path
+        return File(manifestFilePath)
     }
 
     /**
@@ -93,8 +94,8 @@ class SDKSetupThirdStepController {
      *
      * @return Ex."com.onesignal.sdktest"
      */
-    private fun getApplicationPackage(basePath: String, project: Project): String? {
-        val content = getManifestContent(basePath, project)
+    private fun getApplicationPackage(basePath: String, appDirectory: String, project: Project): String? {
+        val content = getManifestFile(basePath, appDirectory).readText()
 
         val packageRegex = "package=\".+\"".toRegex()
         val packageMatch = packageRegex.find(content)?.range
@@ -113,7 +114,7 @@ class SDKSetupThirdStepController {
                 applicationPackage.toString()
             }
         }
-        // Show error, no package found
+
         return null
     }
 
@@ -123,8 +124,8 @@ class SDKSetupThirdStepController {
      *
      * @return Ex.".application.MainApplication"
      */
-    private fun getApplicationFilePath(basePath: String, project: Project): String? {
-        val content = getManifestContent(basePath, project)
+    private fun getApplicationFilePath(basePath: String, appDirectory: String, project: Project): String? {
+        val content = getManifestFile(basePath, appDirectory).readText()
         val applicationRegex = "<application[\\s\\S]+>".toRegex()
 
         val applicationMatch = applicationRegex.find(content)?.range
@@ -189,8 +190,13 @@ class SDKSetupThirdStepController {
         applicationFile.writeText(content)
     }
 
-    private fun addApplicationToManifest(basePath: String, applicationPackage: String, project: Project) {
-        val manifestFile = getManifestFile(basePath, project)
+    private fun addApplicationToManifest(
+        basePath: String,
+        appDirectory: String,
+        applicationPackage: String,
+        project: Project
+    ) {
+        val manifestFile = getManifestFile(basePath, appDirectory)
 
         var content: String = manifestFile.readText()
 
@@ -205,6 +211,11 @@ class SDKSetupThirdStepController {
         manifestFile.writeText(content)
     }
 
+    /**
+     * Inject OneSignal init code to Application file
+     *
+     * Precondition: file exist at given path
+     */
     private fun addInitCodeToFile(applicationFilePath: String, appId: String, project: Project) {
         val applicationFile = File(applicationFilePath)
         val content: String = applicationFile.readText()
@@ -217,7 +228,6 @@ class SDKSetupThirdStepController {
             FileType.KOTLIN ->
                 getKotlinInitCode(content, appId, project)
         }.apply {
-            showNotification(project, "Application class final string: \n$this")
             applicationFile.writeText(this)
         }
     }

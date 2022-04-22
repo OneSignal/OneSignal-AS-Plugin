@@ -12,7 +12,7 @@ import java.awt.CardLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-class OneSignalToolWindowFactory : ToolWindowFactory, OneSignalStepListener {
+class OneSignalToolWindowFactory() : ToolWindowFactory, OneSignalStepListener {
 
     private var project: Project? = null
     private var toolWindow: ToolWindow? = null
@@ -22,6 +22,8 @@ class OneSignalToolWindowFactory : ToolWindowFactory, OneSignalStepListener {
     private var sdkSetupSteps = linkedMapOf<String, OneSignalStep>()
     private var sdkSetupStepIndex = 0
     private var welcomeKey = "welcome_panel"
+    private var appDirectory = "app"
+    private var baseAppBuildGradlePath: String? = null
 
     /**
      * Create the tool window content.
@@ -52,6 +54,18 @@ class OneSignalToolWindowFactory : ToolWindowFactory, OneSignalStepListener {
         val contentFactory = ContentFactory.SERVICE.getInstance()
         val content = contentFactory.createContent(mainPanel, "", false)
         toolWindow.contentManager.addContent(content)
+    }
+
+    override fun getAppDirectory(): String = appDirectory
+
+    override fun setAppDirectory(directory: String) {
+        this.appDirectory = directory
+    }
+
+    override fun getAppBuildGradlePath(): String? = baseAppBuildGradlePath
+
+    override fun setAppBuildGradlePath(path: String) {
+        this.baseAppBuildGradlePath = path
     }
 
     override fun onNextStep() {

@@ -3,6 +3,7 @@ package sdksetup
 import OneSignalStep
 import OneSignalStepListener
 import com.intellij.openapi.project.Project
+import exception.OneSignalException
 import utils.showNotification
 import view.MultilineLabel
 import java.awt.GridBagConstraints
@@ -94,12 +95,32 @@ class SDKSetupSecondStepPanel(
     private fun initListeners() {
         nextButton.addActionListener {
             val buildGradlePath = appDirectoryField.text
-            showNotification(project, "appDirectory $buildGradlePath")
-            if (buildGradlePath.isEmpty())
-                controller.addSDKToAppBuildGradle(basePath, "app", project = project)
-            else
-                controller.addSDKToAppBuildGradle(buildGradlePath, project = project)
-            stepListener.onNextStep()
+            var appDirectory = "app"
+            try {
+                if (buildGradlePath.isNotEmpty()) {
+                    val result = buildGradlePath.split("/")
+                    appDirectory = result[result.size - 1]
+                    val basePathFromGradlePath =
+                        buildGradlePath.subSequence(0, buildGradlePath.length - appDirectory.length - 1)
+
+                    stepListener.setAppDirectory(appDirectory)
+                    stepListener.setAppBuildGradlePath(basePathFromGradlePath.toString())
+
+                    showNotification(project, "basePathFromGradlePath $basePathFromGradlePath")
+                    showNotification(project, "appDirectory $appDirectory")
+                }
+                controller.addSDKToAppBuildGradle(
+                    stepListener.getAppBuildGradlePath() ?: basePath,
+                    appDirectory,
+                    project = project
+                )
+
+                stepListener.onNextStep()
+            } catch (exception: OneSignalException) {
+                exception.message?.let {
+                    showNotification(project, exception.message)
+                }
+            }
         }
         cancelButton.addActionListener {
             stepListener.onStepCancel()

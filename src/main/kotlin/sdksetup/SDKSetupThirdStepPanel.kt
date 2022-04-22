@@ -3,6 +3,7 @@ package sdksetup
 import OneSignalStep
 import OneSignalStepListener
 import com.intellij.openapi.project.Project
+import exception.OneSignalException
 import utils.showNotification
 import view.MultilineLabel
 import java.awt.GridBagConstraints
@@ -21,15 +22,14 @@ class SDKSetupThirdStepPanel(
     private val controller = SDKSetupThirdStepController()
     private val instructionString = """
        OneSignal SDK needs an application class in order to add the init code.
+       If you already have one OneSignal Plugin will search inside your Manifest for it.
        
-       If you already have one OneSignal Plugin will search inside your Manifest for it, 
-       If your application doesn't follow the default package "app" name 
-       Ex. .../OneSignalDemo/app/src/main/java/com/onesignal/sdktest/MainApplication.java 
-       then please add the path to your Application class inside the field box. 
-       
-       If the project doesn't hve an Application Class then OneSignal Plugin will create one for you.
+       If the project doesn't have an Application Class then OneSignal Plugin will create one for you.
        The Application class will be created inside the main project package.
        
+       If you already have an OneSignal app id, then copy and paste it inside the field.
+       You can continue without it if needed.
+        
        Init code:
        
        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)
@@ -41,7 +41,7 @@ class SDKSetupThirdStepPanel(
     private var instructionsLabel: MultilineLabel = MultilineLabel(instructionString)
     private var nextButton: JButton = JButton("Next")
     private var cancelButton: JButton = JButton("Cancel")
-    private var appDirectoryField: JTextField = JTextField(30)
+    private var appIdField: JTextField = JTextField(30)
 
     init {
 
@@ -71,7 +71,7 @@ class SDKSetupThirdStepPanel(
         bagConstraints.weightx = 1.0
         bagConstraints.weighty = 0.1
 
-        add(appDirectoryField, bagConstraints)
+        add(appIdField, bagConstraints)
 
         // Next Button
 
@@ -97,8 +97,27 @@ class SDKSetupThirdStepPanel(
 
     private fun initListeners() {
         nextButton.addActionListener {
-            val buildGradlePath = appDirectoryField.text
-            controller.applicationOneSignalCodeInjection(basePath, "app_id", project)
+
+            showNotification(project, "Third step appDirectory: ${stepListener.getAppDirectory()}")
+
+            var appId = appIdField.text
+            if (appId.isEmpty())
+                appId = "YOUR_ONESIGNAL_APP_ID"
+
+            try {
+                controller.applicationOneSignalCodeInjection(
+                    stepListener.getAppBuildGradlePath() ?: basePath,
+                    stepListener.getAppDirectory(),
+                    appId,
+                    project
+                )
+
+                stepListener.onNextStep()
+            } catch (exception: OneSignalException) {
+                exception.message?.let {
+                    showNotification(project, exception.message)
+                }
+            }
         }
         cancelButton.addActionListener {
             stepListener.onStepCancel()
