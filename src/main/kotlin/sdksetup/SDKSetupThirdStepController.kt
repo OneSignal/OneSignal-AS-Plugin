@@ -239,10 +239,19 @@ class SDKSetupThirdStepController {
 
         result = result.appendStringByMatch(
             "super.onCreate\\(\\);",
+            "OneSignal.setLogLevel",
             """
         // Enable verbose OneSignal logging to debug issues if needed.
         // It is recommended you remove this after validating your implementation.
-        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE);
+        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE);""",
+            "\n\t",
+            project
+        )
+
+        result = result.appendStringByMatch(
+            "OneSignal.setLogLevel(.*)",
+            "OneSignal.setAppId",
+            """
         // OneSignal Initialization
         OneSignal.initWithContext(this);
         OneSignal.setAppId(ONESIGNAL_APP_ID);""",
@@ -270,9 +279,19 @@ class SDKSetupThirdStepController {
 
         result = result.appendStringByMatch(
             "super.onCreate\\(\\)",
-            """// Enable verbose OneSignal logging to debug issues if needed.
+            "OneSignal.setLogLevel",
+            """
+        // Enable verbose OneSignal logging to debug issues if needed.
         // It is recommended you remove this after validating your implementation.
-        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)
+        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)""",
+            "\n\t",
+            project
+        )
+
+        result = result.appendStringByMatch(
+            "OneSignal.setLogLevel(.*)",
+            "OneSignal.setAppId",
+            """
         // OneSignal Initialization
         OneSignal.initWithContext(this)
         OneSignal.setAppId(oneSignalAppId)""",
