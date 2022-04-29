@@ -11,7 +11,6 @@ class MultilineLabel(text: String) : JTextArea(text) {
         border = null
         lineWrap = true
         wrapStyleWord = true
-        isFocusable = false
         isOpaque = false
         font = UIManager.getFont("Label.font")
     }
