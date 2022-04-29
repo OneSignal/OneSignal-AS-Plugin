@@ -21,22 +21,22 @@ class SDKSetupThirdStepPanel(
 
     private val controller = SDKSetupThirdStepController()
     private val instructionString = """
-       OneSignal SDK needs an application class in order to add the init code.
-       If you already have one OneSignal Plugin will search inside your Manifest for it.
+       The OneSignal SDK needs an Application class in order to add the init code.
+       If you already have one, the OneSignal Plugin will search inside your Manifest for it.
+       If you already have one, and the OneSignal Plugin cannot find it, you may need to manually copy the initialization code below into your class.
        
-       If the project doesn't have an Application Class then OneSignal Plugin will create one for you.
+       If the project doesn't have an Application Class, the OneSignal Plugin will create one for you.
        The Application class will be created inside the main project package.
        
-       If you already have an OneSignal app id, then copy and paste it inside the field.
-       You can continue without it if needed.
+       If you already have a OneSignal app ID, then copy and paste it inside the field.
+       If not, you can continue without an app ID, and add it later.
         
        Init code:
-       
        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)
        OneSignal.initWithContext(this)
        OneSignal.setAppId(ONESIGNAL_APP_ID)
        
-       Note: Reload from Disk might be needed when creating the Application class for the user
+       Note: Reload from Disk might be needed when creating the Application class.
     """
     private var instructionsLabel: MultilineLabel = MultilineLabel(instructionString)
     private var nextButton: JButton = JButton("Next")

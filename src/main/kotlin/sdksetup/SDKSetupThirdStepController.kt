@@ -33,6 +33,7 @@ class SDKSetupThirdStepController {
         val applicationPath =
             getApplicationFilePath(basePath, appDirectory, project) // null or ".application.MainApplication"
 
+        // an Application file already exists, find the path and inject initialization code
         if (applicationPath != null) {
             val applicationFilePath =
                 "$projectDirectory${buildPath(applicationPath)}" // "com/onesignal/sdktest/application/MainApplication"
@@ -41,6 +42,8 @@ class SDKSetupThirdStepController {
             val resultPath: String
             val javaPath = "$basePath/$appDirectory/src/main/java/$applicationFilePath.java"
             val kotlinPath = "$basePath/$appDirectory/src/main/kotlin/$applicationFilePath.kt"
+            // need to check this path as A.S. may set up a new Kotlin project with a default directory name of java
+            val kotlinPathWithJavaDir = "$basePath/$appDirectory/src/main/java/$applicationFilePath.kt"
 
             resultPath = when {
                 Files.exists(Paths.get(javaPath)) -> {
@@ -48,6 +51,9 @@ class SDKSetupThirdStepController {
                 }
                 Files.exists(Paths.get(kotlinPath)) -> {
                     kotlinPath
+                }
+                Files.exists(Paths.get(kotlinPathWithJavaDir)) -> {
+                    kotlinPathWithJavaDir
                 }
                 else -> {
                     // Track error
@@ -57,6 +63,7 @@ class SDKSetupThirdStepController {
             showNotification(project, "resultPath: $resultPath")
             addInitCodeToFile(resultPath, appId, project)
         } else {
+            // No Application file exists, create one and inject initialization code
             // Improvement Note: Add an option for the user to choose between Kotlin and Java for the Application class generated
             val applicationClassName = "MainApplication"
             val newApplicationFilePath =
@@ -311,5 +318,4 @@ class SDKSetupThirdStepController {
 
         return result
     }
-
 }
