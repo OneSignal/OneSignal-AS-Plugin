@@ -5,6 +5,8 @@ import com.intellij.ui.content.ContentFactory
 
 import sdksetup.SDKSetupFirstStepPanel
 import sdksetup.SDKSetupSecondStepPanel
+import utils.makeGradleBuildFile
+import utils.makeGradleBuildModel
 import utils.showNotification
 
 import java.awt.CardLayout
@@ -49,6 +51,14 @@ class OneSignalToolWindowFactory : ToolWindowFactory, OneSignalStepListener {
         val contentFactory = ContentFactory.SERVICE.getInstance()
         val content = contentFactory.createContent(mainPanel, "", false)
         toolWindow.contentManager.addContent(content)
+
+        /**
+         * Test getting the GradleBuildModel or GradleBuildFile
+         * These will print the errors
+         */
+        makeGradleBuildModel(project)
+        makeGradleBuildFile(project)
+
     }
 
     override fun onNextStep() {
